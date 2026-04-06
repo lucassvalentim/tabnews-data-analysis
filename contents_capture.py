@@ -1,6 +1,7 @@
 import pandas as pd
 import time
 import requests
+import csv
 
 BASE_URL = "https://www.tabnews.com.br/api/v1"
 
@@ -18,8 +19,13 @@ headers = {
     "Accept": "application/json"
 }
 
+content_lengh = 50
+for row in df_posts.itertuples(index=True):
 
-for row in df_posts.itertuples(index=True):     
+    if row.Index >= content_lengh:
+        break
+
+
     url = f"{BASE_URL}/contents/{row.owner_username}/{row.slug}"
 
     retries = 3
@@ -29,7 +35,10 @@ for row in df_posts.itertuples(index=True):
             
             if response.status_code == 200:
                 all_contents.append(response.json())
+                print("=============")
                 print(f"Conteudo do usuario {row.owner_username} capturado com sucesso")
+                print(f"Usuario da linha {row.Index}")
+                print("=============")
                 time.sleep(1)
                 break
             
@@ -50,4 +59,10 @@ for row in df_posts.itertuples(index=True):
             time.sleep(2 ** attempt)
 
 df_contents = pd.DataFrame(all_contents, columns=columns_posts)
-df_contents.to_csv('contents.csv', index=False)
+df_contents.to_csv(
+    "dados.csv",
+    index=False,
+    encoding="utf-8",
+    quoting=csv.QUOTE_ALL,      # coloca aspas em tudo
+    escapechar="\\",            # escapa caracteres especiais
+)
