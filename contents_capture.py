@@ -14,8 +14,10 @@ columns_posts = [
 all_contents = []
 
 headers = {
-    "User-Agent": "Mozilla/5.0"
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+    "Accept": "application/json"
 }
+
 
 for row in df_posts.itertuples(index=True):     
     url = f"{BASE_URL}/contents/{row.owner_username}/{row.slug}"
@@ -28,11 +30,16 @@ for row in df_posts.itertuples(index=True):
             if response.status_code == 200:
                 all_contents.append(response.json())
                 print(f"Conteudo do usuario {row.owner_username} capturado com sucesso")
+                time.sleep(1)
                 break
             
             elif response.status_code == 429:
                 print("Rate limit... esperando")
                 time.sleep(5)
+            
+            elif response.status_code == 403:
+                print("Rate limit... esperando")
+                time.sleep(30)
             
             else:
                 print(f"Erro {response.status_code} do conteudo o usuario {row.owner_username}")
