@@ -24,7 +24,7 @@ columns_posts = [
     "type"
 ]
 
-def posts_capture(page):
+def pages_capture(page):
     print("============================ INICIANDO A CAPTURA DOS DADOS ============================")
     
     all_pages = []
@@ -63,7 +63,7 @@ def posts_capture(page):
     return all_pages
 
 
-all_pages = posts_capture(300)
+all_pages = pages_capture(975)
 posts = []
 total_coments = 0
 for page in all_pages:
@@ -73,6 +73,6 @@ for page in all_pages:
         total_coments += post["children_deep_count"]
 
 df = pd.DataFrame(posts, columns= columns_posts)
-df.to_csv('csv/posts_file.csv', index=False)
+df.to_parquet('data/tabnews_data.parquet', index=False)
 
 print(f"Total de comentarios: {total_coments}")
