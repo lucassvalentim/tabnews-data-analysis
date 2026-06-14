@@ -2,10 +2,39 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-df = pd.read_parquet("data/tabnews_data.parquet")
+df_posts = pd.read_parquet("../data/tabnews_data.parquet")
+df_content = pd.read_parquet("../data/tabnews_contents.parquet")
+df_erros = pd.read_parquet("../data/erros_contents.parquet")
+
 
 # Filtrar o  nó 'NewsletterOficial' (possível bot) para evitar viés humano
-df_filtered = df[df['owner_username'] != 'NewsletterOficial'].copy()
+id_posts_delete = df_posts.loc[
+    df_posts['owner_username'] == 'NewsletterOficial',
+    'id'
+]
+
+# Remove os posts que nao foram possiveis serem capturados os seus conteudos
+ids_com_erros = df_erros['id']
+
+df_posts = df_posts[
+    ~df_posts["id"].isin(ids_com_erros)
+].copy()
+
+# Remove do df_posts
+df_filtered = df_posts[
+    df_posts['owner_username'] != 'NewsletterOficial'
+].copy()
+
+# Remove do df_content os conteúdos desses posts
+df_filtered_c = df_content[
+    ~df_content['id'].isin(id_posts_delete)
+].copy()
+
+df_filtered = df_filtered.merge(
+    df_filtered_c[['id', 'body']],
+    on='id',
+    how='left'
+)
 
 print(f"Registros após remoção do bot oficial: {df_filtered.shape[0]}")
 
@@ -25,6 +54,8 @@ atributos_para_mineracao = [
     'tabcoins', 'tabcoins_credit', 'tabcoins_debit', 'children_deep_count'
 ]
 
+df_filtered.to_parquet("../data/tabnews_transformed.parquet")
+
 df_selected = df_filtered[atributos_para_mineracao].copy()
 
 print("Aplicando Normalização (MinMax Scaling)...")
@@ -40,5 +71,5 @@ print("\n--- Primeiras 5 linhas do Dataset Pronto e Normalizado ---")
 print(df_normalized.head())
 
 # Salvar o dataset transformado para usar na etapa de Mineração
-df_normalized.to_parquet("data/tabnews_transformed.parquet")
+df_normalized.to_parquet("../data/tabnews_transformed_normalized.parquet")
 print("\nDataset transformado salvo com sucesso em 'data/tabnews_transformed.parquet'")

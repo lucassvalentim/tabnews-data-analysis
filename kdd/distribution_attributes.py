@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = pd.read_parquet("data/tabnews_data.parquet")
+df = pd.read_parquet("../data/tabnews_data.parquet")
 
 sns.set_theme(style="whitegrid", context="paper")
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -34,4 +34,5 @@ axes[1, 1].set_title('Dispersão e Outliers de Comentários')
 axes[1, 1].set_xlabel('Quantidade de Respostas')
 
 plt.tight_layout()
+plt.savefig('outputs/distribution_attributes.png')
 plt.show()

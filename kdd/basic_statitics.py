@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_parquet("data/tabnews_data.parquet")
+df = pd.read_parquet("../data/tabnews_data.parquet")
 
 # Verifica as dimensões da base utilizada
 print("----- Dimensões do Dataset ------")

@@ -6,10 +6,38 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = pd.read_parquet("data/tabnews_data.parquet")
+df_posts = pd.read_parquet("../data/tabnews_data.parquet")
+df_content = pd.read_parquet("../data/tabnews_contents.parquet")
+df_erros = pd.read_parquet("../data/erros_contents.parquet")
 
-# Filtrar o bot institucional para manter o comportamento orgânico humano
-df_filtered = df[df['owner_username'] != 'NewsletterOficial'].copy()
+# Filtrar o  nó 'NewsletterOficial' (possível bot) para evitar viés humano
+id_posts_delete = df_posts.loc[
+    df_posts['owner_username'] == 'NewsletterOficial',
+    'id'
+]
+
+# Remove os posts que nao foram possiveis serem capturados os seus conteudos
+ids_com_erros = df_erros['id']
+
+df_posts = df_posts[
+    ~df_posts["id"].isin(ids_com_erros)
+].copy()
+
+# Remove do df_posts
+df_filtered = df_posts[
+    df_posts['owner_username'] != 'NewsletterOficial'
+].copy()
+
+# Remove do df_content os conteúdos desses posts
+df_filtered_c = df_content[
+    ~df_content['id'].isin(id_posts_delete)
+].copy()
+
+df_filtered = df_filtered.merge(
+    df_filtered_c[['id', 'body']],
+    on='id',
+    how='left'
+)
 
 # Engenharia de Atributos
 df_filtered['title_length'] = df_filtered['title'].str.len()
